@@ -13,11 +13,18 @@ RELEASE="$(rpm -E %fedora)"
 # https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/39/x86_64/repoview/index.html&protocol=https&redirect=1
 
 # this installs a package from fedora repos
-rpm-ostree install screen
+# rpm-ostree install screen
 
 # this would install a package from rpmfusion
 # rpm-ostree install vlc
 
 #### Example for enabling a System Unit File
 
-systemctl enable podman.socket
+# systemctl enable podman.socket
+
+rpm-ostree install \
+    krdp \
+    waydroid \
+    xorg-x11-drv-nvidia-470xx akmod-nvidia-470xx \
+    xorg-x11-drv-nvidia-470xx-cuda \
+    plasma-workspace-x11
