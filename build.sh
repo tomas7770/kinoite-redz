@@ -28,3 +28,23 @@ rpm-ostree install \
     xorg-x11-drv-nvidia-470xx akmod-nvidia-470xx \
     xorg-x11-drv-nvidia-470xx-cuda \
     plasma-workspace-x11
+
+cd /tmp
+
+# Either successfully build and install the kernel modules, or fail early with debug output
+NVIDIA_PACKAGE_NAME="nvidia-470xx"
+KERNEL_VERSION="$(rpm -q "kernel" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
+NVIDIA_AKMOD_VERSION="$(basename "$(rpm -q "akmod-${NVIDIA_PACKAGE_NAME}" --queryformat '%{VERSION}-%{RELEASE}')" ".fc${RELEASE%%.*}")"
+NVIDIA_LIB_VERSION="$(basename "$(rpm -q "xorg-x11-drv-${NVIDIA_PACKAGE_NAME}" --queryformat '%{VERSION}-%{RELEASE}')" ".fc${RELEASE%%.*}")"
+NVIDIA_FULL_VERSION="$(rpm -q "xorg-x11-drv-${NVIDIA_PACKAGE_NAME}" --queryformat '%{EPOCH}:%{VERSION}-%{RELEASE}.%{ARCH}')"
+
+# protect against incorrect permissions in tmp dirs which can break akmods builds
+chmod 1777 /tmp /var/tmp
+
+# akmods expects dnf
+rpm-ostree cliwrap install-to-root /
+
+akmods --force --kernels "${KERNEL_VERSION}" --kmod "${NVIDIA_PACKAGE_NAME}"
+
+modinfo /usr/lib/modules/${KERNEL_VERSION}/extra/${NVIDIA_PACKAGE_NAME}/nvidia{,-drm,-modeset,-peermem,-uvm}.ko.xz > /dev/null || \
+(cat /var/cache/akmods/${NVIDIA_PACKAGE_NAME}/${NVIDIA_AKMOD_VERSION}-for-${KERNEL_VERSION}.failed.log && exit 1)
