@@ -32,4 +32,4 @@ rpm-ostree install \
     /tmp/nvidia/*${KERNEL_VERSION}*.rpm \
     plasma-workspace-x11
 
-rm -rf /var/* && rm -rf /tmp/nvidia && rm -f /kernel-version.txt && \
+rm -rf /var/* && rm -rf /tmp/nvidia && rm -f /kernel-version.txt
