@@ -41,8 +41,37 @@ ARG SOURCE_TAG="40"
 
 ### 2. SOURCE IMAGE
 ## this is a standard Containerfile FROM using the build ARGs above to select the right upstream image
+FROM ghcr.io/ublue-os/${SOURCE_IMAGE}${SOURCE_SUFFIX}:${SOURCE_TAG} as kernel-query
+
+# BUILD NVIDIA KMOD
+
+# Export kernel version to file for use in later stages
+# See https://github.com/coreos/layering-examples/blob/main/build-zfs-module/Containerfile for another example
+RUN rpm -qa kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' > /kernel-version.txt && \
+    echo "Detected kernel version: $(cat /kernel-version.txt)"
+
+FROM fedora:40 as nvidia-base
+ARG RPMFUSION_FREE="https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-40.noarch.rpm"
+ARG RPMFUSION_NON_FREE="https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-40.noarch.rpm"
+
+# Copy kernel version from kernel-query stage
+COPY --from=kernel-query /kernel-version.txt /kernel-version.txt
+
+RUN KERNEL_VERSION=$(cat /kernel-version.txt) && \
+    dnf install -y $RPMFUSION_FREE $RPMFUSION_NON_FREE fedora-repos-archive && \
+    dnf install -y mock xorg-x11-drv-nvidia-470xx{,-cuda} binutils kernel-devel-$KERNEL_VERSION kernel-$KERNEL_VERSION && \
+    akmods --force
+
 FROM ghcr.io/ublue-os/${SOURCE_IMAGE}${SOURCE_SUFFIX}:${SOURCE_TAG}
 
+# Copy kernel version from kernel-query stage
+COPY --from=kernel-query /kernel-version.txt /kernel-version.txt
+
+# See https://pagure.io/releng/issue/11047 for final location
+# Copy kmod rpm from previous stage
+COPY --from=nvidia-base /var/cache/akmods/nvidia-470xx /tmp/nvidia
+
+# END OF BUILD NVIDIA KMOD
 
 ### 3. MODIFICATIONS
 ## make modifications desired in your image and install packages by modifying the build.sh script
