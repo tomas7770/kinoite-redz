@@ -26,7 +26,6 @@ KERNEL_VERSION=$(cat /kernel-version.txt)
 
 rpm-ostree install \
     krdp \
-    waydroid \
     xorg-x11-drv-nvidia-470xx \
     xorg-x11-drv-nvidia-470xx-cuda \
     /tmp/nvidia/*${KERNEL_VERSION}*.rpm \
