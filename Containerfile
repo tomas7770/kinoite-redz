@@ -60,7 +60,7 @@ COPY --from=kernel-query /kernel-version.txt /kernel-version.txt
 RUN KERNEL_VERSION=$(cat /kernel-version.txt) && \
     dnf install -y $RPMFUSION_FREE $RPMFUSION_NON_FREE fedora-repos-archive && \
     dnf install -y mock xorg-x11-drv-nvidia-470xx{,-cuda} binutils kernel-devel-$KERNEL_VERSION kernel-$KERNEL_VERSION && \
-    akmods --force
+    akmods --force --kernels "${KERNEL_VERSION}"
 
 FROM ghcr.io/ublue-os/${SOURCE_IMAGE}${SOURCE_SUFFIX}:${SOURCE_TAG}
 
