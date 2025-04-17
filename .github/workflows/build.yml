@@ -86,6 +86,17 @@ jobs:
             org.opencontainers.image.description=${{ env.MY_IMAGE_DESC }}
             org.opencontainers.image.title=${{ env.MY_IMAGE_NAME }}
 
+      # Retrieve Kmod Signing Key
+      - name: Retrieve Kmod Signing Key
+        shell: bash
+        run: |
+          mkdir -p certs
+          if [[ "${{ github.event_name }}"  != 'pull_request' ]]; then
+            echo "${{ secrets.KMOD_SIGNING_SECRET }}" > certs/private_key.priv
+            # DEBUG: get character count of key
+            wc -c certs/private_key.priv
+          fi
+
       # Build image using Buildah action
       - name: Build Image
         id: build_image
