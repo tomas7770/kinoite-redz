@@ -9,16 +9,12 @@ RUN rpm -qa kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' > /kernel-versi
     echo "Detected kernel version: $(cat /kernel-version.txt)"
 
 FROM fedora:41 as nvidia-base
-ARG RPMFUSION_FREE="https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-41.noarch.rpm"
-ARG RPMFUSION_NON_FREE="https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-41.noarch.rpm"
 
-# Copy kernel version from kernel-query stage
+COPY build-kmod-nvidia.sh /tmp/build-kmod-nvidia.sh
+COPY certs /tmp/certs
 COPY --from=kernel-query /kernel-version.txt /kernel-version.txt
 
-RUN KERNEL_VERSION=$(cat /kernel-version.txt) && \
-    dnf install -y $RPMFUSION_FREE $RPMFUSION_NON_FREE fedora-repos-archive && \
-    dnf install -y mock xorg-x11-drv-nvidia-470xx{,-cuda} binutils kernel-devel-$KERNEL_VERSION kernel-$KERNEL_VERSION && \
-    akmods --force --kernels "${KERNEL_VERSION}"
+RUN /tmp/build-kmod-nvidia.sh
 
 # Build system image
 FROM ghcr.io/ublue-os/kinoite-main:41
