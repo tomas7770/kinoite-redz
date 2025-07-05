@@ -1,5 +1,5 @@
 # Query kernel version for building kmod
-FROM ghcr.io/ublue-os/kinoite-main:41 as kernel-query
+FROM ghcr.io/ublue-os/kinoite-main:42 as kernel-query
 
 # BUILD NVIDIA KMOD
 
@@ -8,7 +8,7 @@ FROM ghcr.io/ublue-os/kinoite-main:41 as kernel-query
 RUN rpm -qa kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' > /kernel-version.txt && \
     echo "Detected kernel version: $(cat /kernel-version.txt)"
 
-FROM fedora:41 as nvidia-base
+FROM fedora:42 as nvidia-base
 
 COPY build-kmod-nvidia.sh /tmp/build-kmod-nvidia.sh
 COPY certs /tmp/certs
@@ -17,7 +17,7 @@ COPY --from=kernel-query /kernel-version.txt /kernel-version.txt
 RUN /tmp/build-kmod-nvidia.sh
 
 # Build system image
-FROM ghcr.io/ublue-os/kinoite-main:41
+FROM ghcr.io/ublue-os/kinoite-main:42
 
 # Copy kernel version from kernel-query stage
 COPY --from=kernel-query /kernel-version.txt /kernel-version.txt

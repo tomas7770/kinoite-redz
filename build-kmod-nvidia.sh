@@ -5,8 +5,8 @@ set -ouex pipefail
 KERNEL="$(cat /kernel-version.txt)"
 
 dnf install -y \
-    https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-41.noarch.rpm \
-    https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-41.noarch.rpm \
+    https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-42.noarch.rpm \
+    https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-42.noarch.rpm \
     fedora-repos-archive
 
 dnf install -y \
