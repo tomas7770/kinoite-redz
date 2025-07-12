@@ -1,12 +1,18 @@
 # Query kernel version for building kmod
 FROM ghcr.io/ublue-os/kinoite-main:42 as kernel-query
 
-# BUILD NVIDIA KMOD
-
 # Export kernel version to file for use in later stages
 # See https://github.com/coreos/layering-examples/blob/main/build-zfs-module/Containerfile for another example
 RUN rpm -qa kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' > /kernel-version.txt && \
     echo "Detected kernel version: $(cat /kernel-version.txt)"
+
+# BUILD VISTA-THEME-PLASMA
+
+COPY compile-vistathemeplasma.sh /tmp/compile-vistathemeplasma.sh
+COPY vistathemeplasma/compile-patched.sh /tmp/compile-patched.sh
+RUN /tmp/compile-vistathemeplasma.sh
+
+# BUILD NVIDIA KMOD
 
 FROM fedora:42 as nvidia-base
 
@@ -15,10 +21,6 @@ COPY certs /tmp/certs
 COPY --from=kernel-query /kernel-version.txt /kernel-version.txt
 
 RUN /tmp/build-kmod-nvidia.sh
-
-COPY compile-vistathemeplasma.sh /tmp/compile-vistathemeplasma.sh
-COPY vistathemeplasma/compile-patched.sh /tmp/compile-patched.sh
-RUN /tmp/compile-vistathemeplasma.sh
 
 # Build system image
 FROM ghcr.io/ublue-os/kinoite-main:42
@@ -29,8 +31,8 @@ COPY --from=kernel-query /kernel-version.txt /kernel-version.txt
 # See https://pagure.io/releng/issue/11047 for final location
 # Copy kmod rpm from previous stage
 COPY --from=nvidia-base /var/cache/akmods/nvidia-470xx /tmp/nvidia
-COPY --from=nvidia-base /tmp/vistathemeplasma /tmp/vistathemeplasma
-COPY --from=nvidia-base /tmp/usr /tmp/vistathemeplasma/usr
+COPY --from=kernel-query /tmp/vistathemeplasma /tmp/vistathemeplasma
+COPY --from=kernel-query /tmp/usr /tmp/vistathemeplasma/usr
 
 # END OF BUILD NVIDIA KMOD
 

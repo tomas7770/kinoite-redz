@@ -2,7 +2,7 @@
 
 set -ouex pipefail
 
-dnf install -y \
+rpm-ostree install \
     git \
     plasma-workspace-devel \
     kvantum \
