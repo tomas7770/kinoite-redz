@@ -30,3 +30,5 @@ rpm-ostree install \
 sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/negativo17-fedora-multimedia.repo
 
 rm -rf /var/* && rm -rf /tmp/nvidia && rm -f /kernel-version.txt
+
+/tmp/install-vistathemeplasma.sh
