@@ -76,7 +76,8 @@ for filename in $(find . -name "install_manifest.txt"); do
     done <$filename
 done
 cp --parents /usr/lib64/qt6/qml/org/kde/plasma/core/libcorebindingsplugin.so /tmp
-for filename in "./misc/defaulttooltip/build/libplasma-v6.4.2/build/bin/libPlasma"*; do
+PLASMA_VERSION="$(rpm -qa plasma-workspace-devel --queryformat \x27%{VERSION}\x27)"
+for filename in "./misc/defaulttooltip/build/libplasma-v${PLASMA_VERSION}/build/bin/libPlasma"*; do
     echo "Copying $filename"
     cp "$filename" /tmp/usr/lib64/
 done
